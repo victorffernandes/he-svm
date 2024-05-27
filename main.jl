@@ -49,10 +49,10 @@ function main()
     encrypt!(M_c[i], plain, encryptor)
   end
 
-  for i in 1:n
-    M_c[i] = Ciphertext()
-    add!(M_c[i], M_c[i], M_c[i], evaluator)
-  end
+  # for i in 1:n
+  #   M_c[i] = Ciphertext()
+  #   add!(M_c[i], M_c[i], M_c[i], evaluator)
+  # end
 
   M_plain = Array{Any}(undef, n);
   for i in 1:n
@@ -87,3 +87,4 @@ function main()
 end
 
 main()
+

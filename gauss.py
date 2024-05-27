@@ -21,8 +21,8 @@ def gauss(matrix, b, M):
     return b
         
 
-matriz_exemplo = [[3, -0.1, -0.2], [0.1, 7, -0.3], [0.3, -0.2, 0]]
-b_exemplo = [7.85, -19.3, 71.4]
+matriz_exemplo = [[3, -0.1, -0.2 ,13], [0.1, 7, -0.3 ,41], [0.3, -0.2, 0 ,54 ], [12, -0.9, 0, 12]]
+b_exemplo = [7.85, -19.3, 71.4, 1090]
 
 
-print(gauss(matriz_exemplo, b_exemplo, 3))
+print(gauss(matriz_exemplo, b_exemplo, len(b_exemplo)))

@@ -30,7 +30,7 @@ function gauss_elimination!(A::Matrix{Float64}, b::Vector{Float64})
 end
 
 # Example usage
-A = [2.0 1.0 -1.0; 2.0 -1.0 2.0; -2.0 1.0 2.0]
+A = [2.0 1.0 -1.0; 0 -1.0 2.0; 0 0 2.0]
 
 b = [8.0; -11.0; -3.0]
 
