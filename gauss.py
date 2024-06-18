@@ -13,16 +13,20 @@ def subtracao(h1, h2, coef, m):
 def gauss(matrix, b, M):
 
     for i in range(M):
-        matrix[i] = divisao_linha(matrix[i], matrix[i][i], M)
+        # print(i, matrix[i])
+        matrix[i] = divisao_linha(matrix[i], matrix[i][i], M) 
+        # print(i, matrix[i])
         for j in range(M):
             if (i != j):
                 b[j] -= b[i] * matrix[j][i]
+                # print(i, j, matrix[j])
                 matrix[j] = subtracao(matrix[j], matrix[i], matrix[j][i], M)
+                # print(i, j, matrix[j])
     return b
         
+matriz_exemplo = [[1.9, 1.6, 1.8], [1.2, 1.9, 1.6], [1.1, 1.2, 1.9]]
+b_exemplo = [1.3, 1.2, 1.7]
 
-matriz_exemplo = [[3, -0.1, -0.2 ,13], [0.1, 7, -0.3 ,41], [0.3, -0.2, 0 ,54 ], [12, -0.9, 0, 12]]
-b_exemplo = [7.85, -19.3, 71.4, 1090]
 
-
-print(gauss(matriz_exemplo, b_exemplo, len(b_exemplo)))
+gauss(matriz_exemplo, b_exemplo, len(b_exemplo))
+print(matriz_exemplo)

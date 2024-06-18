@@ -1,6 +1,6 @@
 from openfhe import *
 
-mult_depth = 1
+mult_depth = 6
 scale_mod_size = 50
 batch_size = 1
 
@@ -13,6 +13,7 @@ cc = GenCryptoContext(parameters)
 cc.Enable(PKESchemeFeature.PKE)
 cc.Enable(PKESchemeFeature.KEYSWITCH)
 cc.Enable(PKESchemeFeature.LEVELEDSHE)
+cc.Enable(PKESchemeFeature.ADVANCEDSHE)
 
 print("The CKKS scheme is using ring dimension: " + str(cc.GetRingDimension()))
 
@@ -23,7 +24,7 @@ cc.EvalRotateKeyGen(keys.secretKey, [1, -2])
 x1 = [0.25, 0.5, 0.75, 1.0, 2.0, 3.0, 4.0, 5.0]
 x2 = [5.0, 4.0, 3.0, 2.0, 1.0, 0.75, 0.5, 0.25]
 
-ptx1 = cc.MakeCKKSPackedPlaintext([12.0])
+ptx1 = cc.MakeCKKSPackedPlaintext([0.9])
 ptx2 = cc.MakeCKKSPackedPlaintext([14.0])
 
 print("Input x1: " + str(ptx1))
@@ -34,10 +35,13 @@ c1 = cc.Encrypt(keys.publicKey, ptx1)
 c2 = cc.Encrypt(keys.publicKey, ptx2)
 
 # Step 4: Evaluation
-# Homomorphic additions
-c_add = cc.EvalAdd(c1, c2)
+
+d = cc.EvalDivide( c1, -1,2,2)
+
+#d = cc.EvalDivide(d, -0.5,0.5,5)
+
 # Homomorphic subtraction
-c_sub = cc.EvalSub(c1, c2)
+c_sub = cc.EvalSub(c1, d)
 # Homomorphic scalar multiplication
 c_scalar = cc.EvalMult(c1,4)
 # Homomorphic multiplication
@@ -48,38 +52,17 @@ c_rot2 = cc.EvalRotate(c1, -2)
 
 # Step 5: Decryption and output
 # Decrypt the result of additions
-ptAdd = cc.Decrypt(c_add,keys.secretKey)
+#ptAdd = cc.Decrypt(c_add,keys.secretKey)
 
 # We set the precision to 8 decimal digits for a nicer output.
 # If you want to see the error/noise introduced by CKKS, bump it up
 # to 15 and it should become visible.
 
-precision = 8
-print("Results of homomorphic computations:")
-result = cc.Decrypt(c1, keys.secretKey)
+result = cc.Decrypt(d, keys.secretKey)
 result.SetLength(batch_size)
-print("x1 = " + str(result))
+print("d = " + str(result.GetCKKSPackedValue()[0].real))
 print("Estimated precision in bits: " + str(result.GetLogPrecision()))
 
-# Decrypt the result of scalar multiplication
-result = cc.Decrypt(c_scalar,keys.secretKey)
-result.SetLength(batch_size)
-print("4 * x1 = " + str(result))
-
-# Decrypt the result of multiplication
-result = cc.Decrypt(c_mult,keys.secretKey)
-result.SetLength(batch_size)
-print("x1 * x2 = " + str(result))
-
-# Decrypt the result of rotations
-result = cc.Decrypt(c_rot1,keys.secretKey)
-result.SetLength(batch_size)
-print("In rotations, very small outputs (~10^-10 here) correspond to 0's:")
-print("x1 rotated by 1 = " + str(result))
-
-result = cc.Decrypt(c_rot2,keys.secretKey)
-result.SetLength(batch_size)
-print("x1 rotated by -2 = " + str(result))
 
 
 
