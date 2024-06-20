@@ -56,7 +56,7 @@ cc.EvalRotateKeyGen(keys.secretKey, list(range(-(num_slots + 1), num_slots+ 1)))
 # [0,0,1,0,0]
 # [3,0,0,1,0] [3,0,0,0,0] [3,0,0,0,0] [3,0,0,0,0] [3,0,0,0,0]
 # [3,3,3,3,1]
-def getCipherTextAtSlot(ciphertext,  i):
+def get_ciphertext_at(ciphertext,  i):
     mask = [0] * num_slots
     mask[i] = 1
 
@@ -115,12 +115,7 @@ def subtracao(h1, h2, coef):
 
     return h1
 
-def updateB(b, line, i, j):
-    cb = getCipherTextAtSlot(b, i)# [b[i], b[i], ..., b[i]]
-    cline = getCipherTextAtSlot(line, i) # [line[i], line[i], ..., line[i]]
-
-    r = cc.EvalMultAndRelinearize(cb, cline)# [b[i] * line[i], b[i] * line[i], ..., b[i] * line[i]]
-
+def sub_at_index(b, r, j):
     mask = [0] * num_slots
     mask[j] = 1
 
@@ -129,8 +124,8 @@ def updateB(b, line, i, j):
 
     return cc.EvalSub(b, result_at_j) # b - [b[i], b[i], ..., b[i] * line[i], b[i], b[i]] na posição j
     
-def updateBDivision(b, dividend, i):
-    cb = getCipherTextAtSlot(b, i)# [b[i], b[i], ..., b[i]]
+def divide_at_index(b, dividend, i):
+    cb = get_ciphertext_at(b, i)# [b[i], b[i], ..., b[i]]
 
     r = cc.EvalMultAndRelinearize(cb, dividend)# [b[i] * line[i], b[i] * line[i], ..., b[i] * line[i]]
 
@@ -151,17 +146,21 @@ def updateBDivision(b, dividend, i):
 
 def gauss(matrix, b, M):
     for i in range(M):
-        d = cc.EvalDivide(getCipherTextAtSlot(matrix[i], i), 1, 256, 129)
+        d = cc.EvalDivide(get_ciphertext_at(matrix[i], i), 1, 256, 129)
         matrix[i] = cc.EvalMultAndRelinearize(matrix[i],d)
         matrix[i] = cc.EvalBootstrap(matrix[i])
 
-        b = updateBDivision(b, d, i)
+        b = divide_at_index(b, d, i)
         b = cc.EvalBootstrap(b)
 
         for j in range(M):
             if (i != j):
-                b = updateB (b, matrix[j], i, j)
-                g = cc.EvalMultAndRelinearize(matrix[i], getCipherTextAtSlot(matrix[j], i))
+                cb = get_ciphertext_at(b, i)
+                cline = get_ciphertext_at(matrix[j], i)
+                r = cc.EvalMultAndRelinearize(cb, cline)
+
+                b = sub_at_index (b, r, j)
+                g = cc.EvalMultAndRelinearize(matrix[i], get_ciphertext_at(matrix[j], i))
                 matrix[j] = cc.EvalSub(matrix[j], g)
                 matrix[j] = cc.EvalBootstrap(matrix[j])
 
